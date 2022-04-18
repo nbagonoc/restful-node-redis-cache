@@ -3,7 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const passport = require("passport");
 const isAdmin = require("../../guards/isAdmin");
-const isModerator = require("../../guards/isModerator");
+const userController = require("../../controllers/user.controller");
+// const isModerator = require("../../guards/isModerator");
 
 
 // bring in user model
@@ -12,8 +13,10 @@ const User = mongoose.model("users");
 
 // GET | api/users/profile
 // view current user profile
+router.get("/profile", userController.getUser);
+
 router.get(
-  "/profile",
+  "/prof",
   passport.authenticate("jwt", {session: false}),
   (req, res) => {
     User.findOne({_id: req.user.id})
