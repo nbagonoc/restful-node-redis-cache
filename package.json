@@ -1,0 +1,19 @@
+{
+  "name": "restful-node-multi-user",
+  "version": "1.0.0",
+  "description": "A RESTful API Boilerplate(So I could play with Angular, React, and VUE) with multi user authentication built with node, express, and more!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nbagonoc/RESTful-node-multi-auth.git"
+  },
+  "author": "Niccu Bagonoc",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nbagonoc/RESTful-node-multi-auth/issues"
+  },
+  "homepage": "https://github.com/nbagonoc/RESTful-node-multi-auth#readme"
+}
