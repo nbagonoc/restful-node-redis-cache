@@ -13,27 +13,7 @@ const User = mongoose.model("users");
 
 // GET | api/users/profile
 // view current user profile
-router.get("/profile", userController.getUser);
-
-router.get(
-  "/prof",
-  passport.authenticate("jwt", {session: false}),
-  (req, res) => {
-    User.findOne({_id: req.user.id})
-      .then(user => {
-        if (user) {
-          res.json({success: true, user});
-        } else {
-          res.json({success: false, message: "User not found"});
-        }
-      })
-      .catch(ex => {
-        return res
-          .status(500)
-          .json({success: false, message: "something went wrong"});
-      });
-  }
-);
+router.get("/profile", passport.authenticate("jwt", {session: false}), userController.getUser);
 
 // GET | api/users
 // view users list
