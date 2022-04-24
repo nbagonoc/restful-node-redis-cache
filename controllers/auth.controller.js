@@ -7,16 +7,16 @@ const key = require("../configs/dbSecretKeys");
 
 const register = (req, res, next) => {
     if (!req.body.name) {
-        res.json({ success: false, message: "name is required" });
+        return res.json({ success: false, message: "name is required" });
     }
     if (!req.body.email) {
-        res.json({ success: false, message: "email is required" });
+        return res.json({ success: false, message: "email is required" });
     }
     if (!req.body.password) {
-        res.json({ success: false, message: "password is required" });
+        return res.json({ success: false, message: "password is required" });
     }
     if (req.body.password != req.body.password2) {
-        res.json({ success: false, message: "password does not match" });
+        return res.json({ success: false, message: "password does not match" });
     } else {
         User.findOne({ email: req.body.email })
             .then(user => {
@@ -29,31 +29,14 @@ const register = (req, res, next) => {
                         password: req.body.password
                     });
                     bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {
-                            if (err) {
-                                res.json({ success: false, message: "Failed to register user" });
-                            } else {
-                                newUser.password = hash;
-                                newUser
-                                    .save()
-                                    .then(() => {
-                                        res.json({ success: true, message: "User registered" });
-                                    })
-                                    .catch(ex => {
-                                        return res
-                                            .status(500)
-                                            .json({ success: false, message: "something went wrong" });
-                                    });
-                            }
+                        bcrypt.hash(newUser.password, salt, (err, hash) => {                            
+                            newUser.password = hash;
+                            newUser.save().then(res.json({ success: true, message: "User registered" }))
                         });
                     });
                 }
             })
-            .catch(ex => {
-                return res
-                    .status(500)
-                    .json({ success: false, message: "something went wrong" });
-            });
+            .catch(err => res.status(500).json({ success: false, message: `something went wrong. ${err}` }))
     }
 }
 
@@ -100,24 +83,14 @@ const login = (req, res, next) => {
                                 return res.json({ success: false, message: "Password incorrect" });
                             }
                         })
-                        .catch(ex => {
-                            return res
-                                .status(500)
-                                .json({ success: false, message: "something went wrong" });
-                        });
                 }
             })
-            .catch(ex => {
-                return res
-                    .status(500)
-                    .json({ success: false, message: "something went wrong" });
-            });
+            .catch(err => res.status(500).json({ success: false, message: `something went wrong. ${err}` }))
     }
 }
 
-const authTest = (req, res) => {
-    res.json({ message: "you are authorized" });
-}
+const authTest = (req, res) => res.json({ message: "you are authorized" });
+
 
 module.exports = {
     register, login, authTest

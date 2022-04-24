@@ -22,7 +22,7 @@ const getUsers = (req, res) => {
 
 const updateUser = (req, res) => {
   if (!req.body.name) {
-    res.json({ success: false, message: "Name is required" })
+    return res.json({ success: false, message: "Name is required" })
   } else {
     User.findById(req.params.id)
         .then(user => {
