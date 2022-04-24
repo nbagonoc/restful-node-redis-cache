@@ -6,30 +6,22 @@ const jwt = require("jsonwebtoken");
 const key = require("../configs/dbSecretKeys");
 
 const register = (req, res, next) => {
-    if (!req.body.name) {
-        return res.json({ success: false, message: "name is required" });
-    }
-    if (!req.body.email) {
-        return res.json({ success: false, message: "email is required" });
-    }
-    if (!req.body.password) {
-        return res.json({ success: false, message: "password is required" });
-    }
-    if (req.body.password != req.body.password2) {
-        return res.json({ success: false, message: "password does not match" });
-    } else {
+    if (!req.body.name) return res.json({ success: false, message: "name is required" })
+    if (!req.body.email) return res.json({ success: false, message: "email is required" })
+    if (!req.body.password) return res.json({ success: false, message: "password is required" })
+    if (req.body.password != req.body.password2) return res.json({ success: false, message: "password does not match" });
+    else {
         User.findOne({ email: req.body.email })
             .then(user => {
-                if (user) {
-                    return res.json({ success: false, message: "Email already exist" });
-                } else {
+                if (user) return res.json({ success: false, message: "Email already exist" });
+                else {
                     const newUser = new User({
                         name: req.body.name,
                         email: req.body.email,
                         password: req.body.password
                     });
                     bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {                            
+                        bcrypt.hash(newUser.password, salt, (err, hash) => {
                             newUser.password = hash;
                             newUser.save().then(res.json({ success: true, message: "User registered" }))
                         });
@@ -43,18 +35,14 @@ const register = (req, res, next) => {
 const login = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-    if (!req.body.email) {
-        return res.json({ success: false, message: "Email is required" });
-    }
-    if (!req.body.password) {
-        return res.json({ success: false, message: "Password is required" });
-    } else {
+    if (!req.body.email) return res.json({ success: false, message: "Email is required" });
+    if (!req.body.password) return res.json({ success: false, message: "Password is required" });
+    else {
         User.findOne({ email })
             .then(user => {
                 // check for user
-                if (!user) {
-                    return res.json({ success: false, message: "User not found" });
-                } else {
+                if (!user) return res.json({ success: false, message: "User not found" });
+                else {
                     // check password
                     bcrypt
                         .compare(password, user.password)
@@ -79,9 +67,7 @@ const login = (req, res, next) => {
                                         });
                                     }
                                 );
-                            } else {
-                                return res.json({ success: false, message: "Password incorrect" });
-                            }
+                            } else return res.json({ success: false, message: "Password incorrect" });
                         })
                 }
             })
@@ -92,6 +78,4 @@ const login = (req, res, next) => {
 const authTest = (req, res) => res.json({ message: "you are authorized" });
 
 
-module.exports = {
-    register, login, authTest
-}
+module.exports = { register, login, authTest }
