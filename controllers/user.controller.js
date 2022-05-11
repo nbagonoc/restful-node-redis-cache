@@ -1,6 +1,4 @@
-const mongoose = require("mongoose")
-require("../models/User")
-const User = mongoose.model("users")
+const User = require("../models/User")
 
 const getProfile = (req, res) => {
   User.findById(req.user.id)
