@@ -7,7 +7,6 @@ const register = async (req, res) => {
     try {
         const validation = await validateRegister(req.body);
         const userExist = User.findOne({ email: req.body.email });
-        console.log(userExist)
         if (!validation.isValid) return res.status(400).json(validation.errors);
         if (userExist) {
             return res.status(400).json({ message: 'Email already exist' });
@@ -22,8 +21,7 @@ const register = async (req, res) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
                 newUser.password = hash;
                 newUser.save().then(
-                    res.json({
-                        success: true,
+                    res.status(200).json({
                         message: 'User registered',
                     })
                 );
