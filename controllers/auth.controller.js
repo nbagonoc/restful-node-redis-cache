@@ -12,7 +12,7 @@ const register = async (req, res) => {
         const user = await User.findOne({ email: req.body.email })
         if (user) return res.status(400).json({ email: 'Email already exist' })
 
-        const hashedPassword = hasher(req.body.password)
+        const hashedPassword = await hasher(req.body.password)
         const newUser = new User({
             firsName: req.body.firsName,
             lastName: req.body.lastName,
