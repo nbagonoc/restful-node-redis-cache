@@ -14,7 +14,7 @@ const register = async (req, res) => {
 
         const hashedPassword = await hasher(req.body.password)
         const newUser = new User({
-            firsName: req.body.firsName,
+            firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
@@ -41,7 +41,7 @@ const login = async (req, res) => {
 
         const payload = {
             id: user.id,
-            firsName: user.firsName,
+            firstName: user.firstName,
             role: user.role,
         }
         const token = await tokenizer(payload)

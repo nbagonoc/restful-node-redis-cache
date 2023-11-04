@@ -4,9 +4,11 @@ const { Schema } = mongoose
 const UserSchema = new Schema({
     firstName: {
         type: String,
+        required: true,
     },
-    lastNname: {
+    lastName: {
         type: String,
+        required: true,
     },
     email: {
         type: String,
@@ -15,9 +17,11 @@ const UserSchema = new Schema({
     role: {
         type: String,
         default: 'subscriber',
+        required: true,
     },
     password: {
         type: String,
+        required: true,
     },
 })
 
