@@ -1,7 +1,11 @@
-const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const validator = require("validator");
+
+const User = require('../models/User')
 const key = require('../configs/dbSecretKeys')
+
+
 
 // REGISTER
 const register = async (req, res) => {
@@ -12,7 +16,7 @@ const register = async (req, res) => {
         const user = await User.findOne({ email: req.body.email })
         if (user) return res.status(400).json({ email: 'Email already exist' })
 
-        const hashedPassword = await hasher(req.body.password)
+        const hashedPassword = await passwordHasher(req.body.password)
         const newUser = new User({
             firstName: req.body.firstName,
             lastName: req.body.lastName,
@@ -36,7 +40,7 @@ const login = async (req, res) => {
         const user = await User.findOne({ email: req.body.email })
         if (!user) return res.status(400).json({ message: 'User does not exist or Password incorrect' })
 
-        const checkedPassword = await checker(req.body.password, user.password)
+        const checkedPassword = await passwordChecker(req.body.password, user.password)
         if (!checkedPassword) return res.status(400).json({ message: 'User does not exist or Password incorrect' })
 
         const payload = {
@@ -55,8 +59,8 @@ const login = async (req, res) => {
 const validateLogin = (data) => {
     let errors = {}
 
-    if (!data.email) errors.email = 'Email is required'
-    if (!data.password) errors.password = 'Password is required'
+    if (validator.isEmpty(data.email, {ignore_whitespace: true})) errors.email = 'Email is required'
+    if (validator.isEmpty(data.password, {ignore_whitespace: true})) errors.password = 'Password is required'
     return {
         errors,
         isValid: Object.keys(errors).length === 0,
@@ -67,13 +71,14 @@ const validateLogin = (data) => {
 const validateRegister = (data) => {
     let errors = {}
 
-    if (!data.firstName) errors.firstName = 'First Name is required'
-    if (!data.lastName) errors.lastName = 'Last name is required'
-    if (!data.email) errors.email = 'Email is required'
-    if (!data.password) errors.password = 'Password is required'
-    if (!data.password2) errors.password2 = 'Confirm password is required'
-    if (data.password !== data.password2)
-        errors.password2 = 'Passwords must match'
+    if (validator.isEmpty(data.firstName, {ignore_whitespace: true})) errors.firstName = 'First name is required'
+    if (validator.isEmpty(data.lastName, {ignore_whitespace: true})) errors.lastName = 'Last name is required'
+    if (!validator.isEmail(data.email)) errors.email = 'Email is invalid'
+    if (validator.isEmpty(data.email, {ignore_whitespace: true})) errors.email = 'Email is required'
+    if (!validator.isStrongPassword(data.password)) errors.password = 'Password not strong enough'
+    if (validator.isEmpty(data.password, {ignore_whitespace: true})) errors.password = 'Password is required'
+    if (!validator.equals(data.password, data.password2)) errors.password2 = 'Passwords must match'
+    if (validator.isEmpty(data.password2, {ignore_whitespace: true})) errors.password2 = 'Confirm password is required'
     return {
         errors,
         isValid: Object.keys(errors).length === 0,
@@ -81,20 +86,20 @@ const validateRegister = (data) => {
 }
 
 // HASH PASSWORD
-const hasher = async (password) => {
+const passwordHasher = async (password) => {
     const salt = await bcrypt.genSalt(10)
     const hash = await bcrypt.hash(password, salt)
     return hash
 }
 
 // CHECK PASSWORD
-const checker = async (password, comparePassword) => {
+const passwordChecker = async (password, comparePassword) => {
     return await bcrypt.compare(password, comparePassword)
 }
 
 // JWT SIGN
-const tokenizer = async (payload) => {
-    const token = await jwt.sign(payload, key.secretOrKey, { expiresIn: 86400 })
+const tokenizer = (payload) => {
+    const token = jwt.sign(payload, key.secretOrKey, { expiresIn: 86400 })
     return 'JWT ' + token
 }
 
@@ -106,5 +111,5 @@ module.exports = {
     login,
     authTest,
     validateRegister,
-    hasher,
+    passwordHasher,
 }
