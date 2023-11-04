@@ -14,7 +14,8 @@ const register = async (req, res) => {
 
         const hashedPassword = hasher(req.body.password)
         const newUser = new User({
-            name: req.body.name,
+            firsName: req.body.firsName,
+            lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
         })
@@ -40,7 +41,7 @@ const login = async (req, res) => {
 
         const payload = {
             id: user.id,
-            name: user.name,
+            firsName: user.firsName,
             role: user.role,
         }
         const token = await tokenizer(payload)
@@ -66,7 +67,8 @@ const validateLogin = (data) => {
 const validateRegister = (data) => {
     let errors = {}
 
-    if (!data.name) errors.name = 'Name is required'
+    if (!data.firstName) errors.firstName = 'First Name is required'
+    if (!data.lastName) errors.lastName = 'Last name is required'
     if (!data.email) errors.email = 'Email is required'
     if (!data.password) errors.password = 'Password is required'
     if (!data.password2) errors.password2 = 'Confirm password is required'

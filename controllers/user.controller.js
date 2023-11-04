@@ -19,14 +19,17 @@ const getUsers = (req, res) => {
 }
 
 const updateUser = (req, res) => {
-  if (!req.body.name) return res.json({ success: false, message: "Name is required" })
+  if (!req.body.firstName) return res.json({ success: false, message: "First name is required" })
+  if (!req.body.lastName) return res.json({ success: false, message: "Last name is required" })
   if (!req.body.role) return res.json({ success: false, message: "Role is required" })
   else {
     User.findById(req.params.id)
         .then(user => {
           if(user) {
-            user.name = req.body.name
+            user.firstName = req.body.firstName
+            user.lastName = req.body.lastName
             user.role = req.body.role
+            
             user.save().then(res.json({ success: true, message: "User updated!" }))
           } else res.json({ success: false, message: "User not found." })
         })
