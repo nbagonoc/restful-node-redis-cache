@@ -46,7 +46,7 @@ const login = async (req, res) => {
         const token = await tokenizer(payload)
         res.status(200).json({ token: token })
     } catch (error) {
-        res.status(500).json({ message: `something went wrong. ${error}` })
+        res.status(500).json({ message: `something went wrong: ${error}` })
     }
 }
 
@@ -97,7 +97,7 @@ const tokenizer = async (payload) => {
 }
 
 // TEST AUTH
-const authTest = (req, res) => res.statu(200).json({ message: 'you are authorized' })
+const authTest = (req, res) => res.status(200).json({ message: 'you are authorized' })
 
 module.exports = {
     register,
