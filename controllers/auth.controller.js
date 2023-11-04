@@ -44,7 +44,7 @@ const login = async (req, res) => {
             role: user.role,
         }
         const token = await tokenizer(payload)
-        res.statu(200).json({ token: token })
+        res.status(200).json({ token: token })
     } catch (error) {
         res.status(500).json({ message: `something went wrong. ${error}` })
     }
