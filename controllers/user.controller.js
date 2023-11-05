@@ -1,46 +1,103 @@
-const User = require("../models/User")
+const User = require('../models/User')
+const validator = require("validator");
 
-const getProfile = (req, res) => {
-  User.findById(req.user.id)
-      .then(user => user ? res.status(200).json(user) : res.status(404).json({ message: "User not found." }))
-      .catch(err => res.status(500).json({ message: `something went wrong. ${err}` }))
+// VIEW PROFILE
+const getProfile = async (req, res) => {
+    try {
+        // const user = await User.findById(req.user.id).select('firstName lastName role email')
+        const user = await User.findById(req.user.id).select('-password -__v')
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' })
+        }
+        return res.status(200).json(user)
+    } catch (err) {
+        res.status(500).json({ message: `something went wrong. ${err}` })
+    }
 }
 
-const getUser = (req, res) => {
-  User.findById(req.params.id)
-      .then(user => user ? res.status(200).json(user) : res.status(404).json({ message: "User not found." }))
-      .catch(err => res.status(500).json({ message: `something went wrong. ${err}` }))
+// GET USER
+const getUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-password -__v')
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' })
+        }
+        return res.status(200).json(user)
+    } catch (err) {
+        res.status(500).json({ message: `something went wrong. ${err}` })
+    }
 }
 
-const getUsers = (req, res) => {
-  User.find({ role: "subscriber" })
-      .then(users => users ? res.status(200).json({ users }) : res.status(404).json({ message: "Users not found." }))
-      .catch(err => res.status(500).json({ message: `something went wrong. ${err}` }))
+// GET USERS
+const getUsers = async (req, res) => {
+    try {
+        const users = await User.find({ role: 'subscriber' }).select('-password -__v')
+        if (!users) {
+            return res.status(404).json({ message: 'Users not found.' })
+        }
+        return res.status(200).json({ users })
+    } catch (err) {
+        res.status(500).json({ message: `something went wrong. ${err}` })
+    }
 }
 
-const updateUser = (req, res) => {
-  if (!req.body.firstName) return res.status(400).json({ message: "First name is required" })
-  if (!req.body.lastName) return res.status(400).json({ message: "Last name is required" })
-  if (!req.body.role) return res.status(400).json({ message: "Role is required" })
-  else {
-    User.findById(req.params.id)
-        .then(user => {
-          if(user) {
-            user.firstName = req.body.firstName
-            user.lastName = req.body.lastName
-            user.role = req.body.role
-            
-            user.save().then(res.status(200).json({ message: "User updated!" }))
-          } else res.status(404).json({ message: "User not found." })
-        })
-        .catch(err => res.status(500).json({ message: `something went wrong. ${err}` }))
-  }
+// UPDATE USER
+const updateUser = async (req, res) => {
+    const validation = validateUpdate(req.body)
+    if (!validation.isValid) {
+        return res.status(400).json(validation.errors)
+    }
+    try {
+        const user = await User.findById(req.params.id)
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' })
+        }
+
+        const { firstName, lastName, role } = req.body;
+        user.set({ firstName, lastName, role });
+        await user.save()
+        return res.status(200).json({ message: 'User updated!' })
+    } catch (err) {
+        res.status(500).json({ message: `something went wrong. ${err}` })
+    }
 }
 
-const deleteUser = (req, res) => {
-  User.findById(req.params.id)
-      .then(user => user ? user.remove().then(res.status(200).json({ message: "User has been removed." })) : res.status(404).json({ message: "User not found." }))
-      .catch(err => res.status(500).json({ message: `something went wrong. ${err}` }))
+// DELETE USER
+const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id)
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' })
+        }
+        await user.remove()
+        return res.status(200).json({ message: 'User has been removed.' })
+    } catch (err) {
+        res.status(500).json({ message: `something went wrong. ${err}` })
+    }
+}
+
+
+// VALIDATE UPDATE
+const validateUpdate = (data) => {
+    let errors = {}
+
+    if (validator.isEmpty(data.firstName, { ignore_whitespace: true }))
+        errors.firstName = 'First name is required'
+    if (validator.isEmpty(data.lastName, { ignore_whitespace: true }))
+        errors.lastName = 'Last name is required'
+    if (!validator.isEmail(data.email))
+        errors.email = 'Email is invalid'
+    if (validator.isEmpty(data.email, { ignore_whitespace: true }))
+        errors.email = 'Email is required'
+    if (!validator.equals(data.role, 'moderator') && !validator.equals(data.role, 'subscriber'))
+        errors.role = 'Role is invalid'
+    if (validator.isEmpty(data.role, { ignore_whitespace: true }))
+        errors.role = 'Role is required'
+    return {
+        errors,
+        isValid: Object.keys(errors).length === 0,
+    }
 }
 
 module.exports = {
@@ -48,5 +105,6 @@ module.exports = {
     getUser,
     getUsers,
     updateUser,
-    deleteUser
+    deleteUser,
+    validateUpdate
 }
