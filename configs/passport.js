@@ -5,15 +5,15 @@ const mongoose = require('mongoose')
 const User = mongoose.model('users')
 const keys = require('./dbSecretKeys')
 
-let opts = {}
-// opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt')
-opts.secretOrKey = keys.secretOrKey
+let opts = {
+    jwtFromRequest : ExtractJwt.fromAuthHeaderWithScheme('jwt'),
+    secretOrKey : keys.secretOrKey
+}
 
 module.exports = passport => {
     passport.use(
         new JwtStrategy(opts, async (jwt_payload, done) => {
-            // console.log(jwt_payload)
+            console.log('it reaced passport')
             try {
                 const user = await User.findById(jwt_payload._id).select('_id firstName role')
                 return user ? done(null, user) : done(null, false)
