@@ -44,7 +44,7 @@ const login = async (req, res) => {
         if (!checkedPassword) return res.status(400).json({ message: 'User does not exist or Password incorrect' })
 
         const payload = {
-            id: user.id,
+            _id: user._id,
             firstName: user.firstName,
             role: user.role,
         }

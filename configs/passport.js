@@ -13,9 +13,10 @@ opts.secretOrKey = keys.secretOrKey
 module.exports = passport => {
     passport.use(
         new JwtStrategy(opts, async (jwt_payload, done) => {
+            console.log(jwt_payload)
             try {
-                const user = await User.findById(jwt_payload.id);
-                user ? done(null, user) : done(null, false)
+                const user = await User.findById(jwt_payload._id);
+                return user ? done(null, user) : done(null, false)
               } catch (error) {
                 throw new Error(`something went wrong: ${error}`);
               }
