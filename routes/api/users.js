@@ -3,7 +3,7 @@ const router = express.Router()
 const passport = require('passport')
 const isAdmin = require('../../guards/isAdmin')
 const userController = require('../../controllers/user.controller')
-const isModerator = require('../../guards/isModerator')
+const isModOrAdmin = require('../../guards/isModOrAdmin')
 
 // GET
 // api/users
@@ -11,7 +11,7 @@ const isModerator = require('../../guards/isModerator')
 router.get(
     '/',
     passport.authenticate('jwt', { session: false }),
-    [isAdmin, isModerator],
+    [isModOrAdmin],
     userController.getUsers
 )
 
@@ -30,7 +30,7 @@ router.get(
 router.get(
     '/view/:id',
     passport.authenticate('jwt', { session: false }),
-    [isAdmin, isModerator],
+    [isModOrAdmin],
     userController.getUser
 )
 
@@ -40,7 +40,7 @@ router.get(
 router.put(
     '/update/:id',
     passport.authenticate('jwt', { session: false }),
-    [isAdmin, isModerator],
+    [isModOrAdmin],
     userController.updateUser
 )
 
@@ -50,7 +50,7 @@ router.put(
 router.delete(
     '/delete/:id',
     passport.authenticate('jwt', { session: false }),
-    [isAdmin, isModerator],
+    [isModOrAdmin],
     userController.deleteUser
 )
 
