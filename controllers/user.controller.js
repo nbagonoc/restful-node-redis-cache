@@ -32,7 +32,7 @@ const getUser = async (req, res) => {
 // GET USERS
 const getUsers = async (req, res) => {
     try {
-        const users = await User.find({ role: 'subscriber' }).select('-password -__v')
+        const users = await User.find({ role: 'user' }).select('-password -__v')
         if (!users) {
             return res.status(404).json({ message: 'Users not found.' })
         }
@@ -90,7 +90,7 @@ const validateUpdate = (data) => {
         errors.email = 'Email is invalid'
     if (validator.isEmpty(data.email, { ignore_whitespace: true }))
         errors.email = 'Email is required'
-    if (!validator.equals(data.role, 'moderator') && !validator.equals(data.role, 'subscriber'))
+    if (!validator.equals(data.role, 'moderator') && !validator.equals(data.role, 'user'))
         errors.role = 'Role is invalid'
     if (validator.isEmpty(data.role, { ignore_whitespace: true }))
         errors.role = 'Role is required'
