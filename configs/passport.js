@@ -6,19 +6,21 @@ const User = mongoose.model('users')
 const keys = require('./dbSecretKeys')
 
 let opts = {
-    jwtFromRequest : ExtractJwt.fromAuthHeaderWithScheme('jwt'),
-    secretOrKey : keys.secretOrKey
+    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt'),
+    secretOrKey: keys.secretOrKey,
 }
 
-module.exports = passport => {
+module.exports = (passport) => {
     passport.use(
         new JwtStrategy(opts, async (jwt_payload, done) => {
             try {
-                const user = await User.findById(jwt_payload._id).select('_id firstName role')
+                const user = await User
+                    .findById(jwt_payload._id)
+                    .select('_id firstName role')
                 return user ? done(null, user) : done(null, false)
-              } catch (error) {
-                throw new Error(`something went wrong: ${error}`);
-              }
+            } catch (error) {
+                throw new Error(`something went wrong: ${error}`)
+            }
         })
     )
 }
