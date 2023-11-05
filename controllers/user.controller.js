@@ -10,8 +10,8 @@ const getProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' })
         }
         return res.status(200).json(user)
-    } catch (err) {
-        res.status(500).json({ message: `something went wrong. ${err}` })
+    } catch (error) {
+        throw new Error(`something went wrong. ${error}`)
     }
 }
 
@@ -24,8 +24,8 @@ const getUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found.' })
         }
         return res.status(200).json(user)
-    } catch (err) {
-        res.status(500).json({ message: `something went wrong. ${err}` })
+    } catch (error) {
+        throw new Error(`something went wrong. ${error}`)
     }
 }
 
@@ -36,9 +36,9 @@ const getUsers = async (req, res) => {
         if (!users) {
             return res.status(404).json({ message: 'Users not found.' })
         }
-        return res.status(200).json({ users })
-    } catch (err) {
-        res.status(500).json({ message: `something went wrong. ${err}` })
+        return res.status(200).json(users)
+    } catch (error) {
+        throw new Error(`something went wrong. ${error}`)
     }
 }
 
@@ -58,8 +58,8 @@ const updateUser = async (req, res) => {
         user.set({ firstName, lastName, role });
         await user.save()
         return res.status(200).json({ message: 'User updated!' })
-    } catch (err) {
-        res.status(500).json({ message: `something went wrong. ${err}` })
+    } catch (error) {
+        throw new Error(`something went wrong. ${error}`)
     }
 }
 
@@ -72,8 +72,8 @@ const deleteUser = async (req, res) => {
         }
         await user.remove()
         return res.status(200).json({ message: 'User has been removed.' })
-    } catch (err) {
-        res.status(500).json({ message: `something went wrong. ${err}` })
+    } catch (error) {
+        throw new Error(`something went wrong. ${error}`)
     }
 }
 
