@@ -2,10 +2,10 @@
   "name": "restful-node-multi-user",
   "version": "1.0.0",
   "description": "A RESTful API Boilerplate(So I could play with Angular, React, and VUE) with multi user authentication built with node, express, and more!",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,6 @@
     "mongoose": "^6.3.0",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
-    "validator": "^13.7.0"
+    "validator": "^13.11.0"
   }
 }

@@ -1,81 +1,132 @@
-const mongoose = require("mongoose");
-require("../models/User");
-const User = mongoose.model("users");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const key = require("../configs/dbSecretKeys");
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const validator = require('validator')
 
-const register = (req, res, next) => {
-    if (!req.body.name) return res.json({ success: false, message: "name is required" })
-    if (!req.body.email) return res.json({ success: false, message: "email is required" })
-    if (!req.body.password) return res.json({ success: false, message: "password is required" })
-    if (req.body.password != req.body.password2) return res.json({ success: false, message: "password does not match" });
-    else {
-        User.findOne({ email: req.body.email })
-            .then(user => {
-                if (user) return res.json({ success: false, message: "Email already exist" });
-                else {
-                    const newUser = new User({
-                        name: req.body.name,
-                        email: req.body.email,
-                        password: req.body.password
-                    });
-                    bcrypt.genSalt(10, (err, salt) => {
-                        bcrypt.hash(newUser.password, salt, (err, hash) => {
-                            newUser.password = hash;
-                            newUser.save().then(res.json({ success: true, message: "User registered" }))
-                        });
-                    });
-                }
-            })
-            .catch(err => res.status(500).json({ success: false, message: `something went wrong. ${err}` }))
+const User = require('../models/User')
+const key = require('../configs/dbSecretKeys')
+
+// REGISTER
+const register = async (req, res) => {
+    const validation = validateRegister(req.body)
+    if (!validation.isValid) return res.status(400).json(validation.errors)
+
+    try {
+        const user = await User.findOne({ email: req.body.email })
+        if (user) return res.status(400).json({ email: 'Email already exist' })
+
+        const hashedPassword = await passwordHasher(req.body.password)
+        const newUser = new User({
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            password: hashedPassword,
+        })
+
+        await newUser.save()
+        res.status(200).json({ message: 'User registered' })
+    } catch (error) {
+        res.status(500).json({ message: `Something went wrong: ${error}` })
     }
 }
 
-const login = (req, res, next) => {
-    const email = req.body.email;
-    const password = req.body.password;
-    if (!req.body.email) return res.json({ success: false, message: "Email is required" });
-    if (!req.body.password) return res.json({ success: false, message: "Password is required" });
-    else {
-        User.findOne({ email })
-            .then(user => {
-                // check for user
-                if (!user) return res.json({ success: false, message: "User not found" });
-                else {
-                    // check password
-                    bcrypt
-                        .compare(password, user.password)
-                        .then(isMatch => {
-                            if (isMatch) {
-                                // user matched
-                                const payload = {
-                                    id: user.id,
-                                    name: user.name,
-                                    // email: user.email,
-                                    role: user.role
-                                }; // create JWT payload
-                                // sign token
-                                jwt.sign(
-                                    payload,
-                                    key.secretOrKey,
-                                    { expiresIn: 86400 },
-                                    (err, token) => {
-                                        res.json({
-                                            success: true,
-                                            token: "JWT " + token
-                                        });
-                                    }
-                                );
-                            } else return res.json({ success: false, message: "Password incorrect" });
-                        })
-                }
-            })
-            .catch(err => res.status(500).json({ success: false, message: `something went wrong. ${err}` }))
+// LOGIN
+const login = async (req, res) => {
+    const validation = validateLogin(req.body)
+    if (!validation.isValid) return res.status(400).json(validation.errors)
+
+    try {
+        const user = await User.findOne({ email: req.body.email })
+        if (!user)
+            return res
+                .status(400)
+                .json({ message: 'User does not exist or Password incorrect' })
+
+        const checkedPassword = await passwordChecker(
+            req.body.password,
+            user.password
+        )
+        if (!checkedPassword)
+            return res
+                .status(400)
+                .json({ message: 'User does not exist or Password incorrect' })
+
+        const payload = {
+            _id: user._id,
+            firstName: user.firstName,
+            role: user.role,
+        }
+        const token = await tokenizer(payload)
+        res.status(200).json({ token: token })
+    } catch (error) {
+        res.status(500).json({ message: `something went wrong: ${error}` })
     }
 }
 
-const authTest = (req, res) => res.json({ message: "you are authorized" });
+// VALIDATE LOGIN
+const validateLogin = (data) => {
+    let errors = {}
 
+    if (validator.isEmpty(data.email, { ignore_whitespace: true }))
+        errors.email = 'Email is required'
+    if (validator.isEmpty(data.password, { ignore_whitespace: true }))
+        errors.password = 'Password is required'
+    return {
+        errors,
+        isValid: Object.keys(errors).length === 0,
+    }
+}
 
-module.exports = { register, login, authTest }
+// VALIDATE REGISTER
+const validateRegister = (data) => {
+    let errors = {}
+
+    if (validator.isEmpty(data.firstName, { ignore_whitespace: true }))
+        errors.firstName = 'First name is required'
+    if (validator.isEmpty(data.lastName, { ignore_whitespace: true }))
+        errors.lastName = 'Last name is required'
+    if (!validator.isEmail(data.email)) errors.email = 'Email is invalid'
+    if (validator.isEmpty(data.email, { ignore_whitespace: true }))
+        errors.email = 'Email is required'
+    if (!validator.isStrongPassword(data.password))
+        errors.password = 'Password not strong enough'
+    if (validator.isEmpty(data.password, { ignore_whitespace: true }))
+        errors.password = 'Password is required'
+    if (!validator.equals(data.password, data.password2))
+        errors.password2 = 'Passwords must match'
+    if (validator.isEmpty(data.password2, { ignore_whitespace: true }))
+        errors.password2 = 'Confirm password is required'
+    return {
+        errors,
+        isValid: Object.keys(errors).length === 0,
+    }
+}
+
+// HASH PASSWORD
+const passwordHasher = async (password) => {
+    const salt = await bcrypt.genSalt(10)
+    const hash = await bcrypt.hash(password, salt)
+    return hash
+}
+
+// CHECK PASSWORD
+const passwordChecker = async (password, comparePassword) => {
+    return await bcrypt.compare(password, comparePassword)
+}
+
+// JWT SIGN
+const tokenizer = (payload) => {
+    const token = jwt.sign(payload, key.secretOrKey, { expiresIn: 86400 })
+    return 'JWT ' + token
+}
+
+// TEST AUTH
+const authTest = (req, res) =>
+    res.status(200).json({ message: 'you are authorized' })
+
+module.exports = {
+    register,
+    login,
+    authTest,
+    validateRegister,
+    passwordHasher,
+}
