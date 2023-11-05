@@ -13,7 +13,6 @@ let opts = {
 module.exports = passport => {
     passport.use(
         new JwtStrategy(opts, async (jwt_payload, done) => {
-            console.log('it reaced passport')
             try {
                 const user = await User.findById(jwt_payload._id).select('_id firstName role')
                 return user ? done(null, user) : done(null, false)
