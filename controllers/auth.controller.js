@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 
 const User = require('../models/User')
-const key = process.env.SECRET_OR_KEY
 
 // REGISTER
 const register = async (req, res) => {
@@ -58,6 +57,7 @@ const login = async (req, res) => {
         const token = await tokenizer(payload)
         res.status(200).json({ token: token })
     } catch (error) {
+        console.log(error)
         throw new Error(`something went wrong. ${error}`)
     }
 }
@@ -115,7 +115,7 @@ const passwordChecker = async (password, comparePassword) => {
 
 // JWT SIGN
 const tokenizer = (payload) => {
-    const token = jwt.sign(payload, key.secretOrKey, { expiresIn: 86400 })
+    const token = jwt.sign(payload, process.env.SECRET_OR_KEY, { expiresIn: 86400 })
     return 'JWT ' + token
 }
 

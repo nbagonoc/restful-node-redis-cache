@@ -26,8 +26,10 @@ app.use(express.json());
 // ROUTES
 const auth = require('./routes/api/auth');
 const users = require('./routes/api/users');
+const posts = require('./routes/api/posts');
 app.use('/api/auth', auth);
 app.use('/api/users', users);
+app.use('/api/posts', posts);
 
 // SESSION
 const session = require('express-session');
