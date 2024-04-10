@@ -10,13 +10,13 @@ const getPosts = async (req, res) => {
         }
         return res.status(200).json(posts)
     } catch (error) {
-        throw new Error(`something went wrong. ${error}`)
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
 const getPostsByUser = async (req, res) => {
     try {
-        const posts = await Post.find({ user: req.params.id })
+        const posts = await Post.find({ user: req.params._id })
             .sort({ createdAt: -1 })
             .select('-__v')
         if (!posts) {
@@ -24,7 +24,7 @@ const getPostsByUser = async (req, res) => {
         }
         return res.status(200).json(posts)
     } catch (error) {
-        throw new Error(`something went wrong. ${error}`)
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -36,7 +36,7 @@ const getPost = async (req, res) => {
         }
         return res.status(200).json(post)
     } catch (error) {
-        throw new Error(`something went wrong. ${error}`)
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -51,7 +51,7 @@ const createPost = async (req, res) => {
         await newPost.save()
         return res.status(201).json({ message: 'Post created!' })
     } catch (error) {
-        throw new Error(`something went wrong. ${error}`)
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -73,7 +73,7 @@ const updatePost = async (req, res) => {
         await post.save()
         return res.status(200).json({ message: 'Post updated!' })
     } catch (error) {
-        throw new Error(`something went wrong. ${error}`)
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
@@ -91,7 +91,7 @@ const deletePost = async (req, res) => {
         await post.remove()
         return res.status(200).json({ message: 'Post deleted!' })
     } catch (error) {
-        throw new Error(`something went wrong. ${error}`)
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
