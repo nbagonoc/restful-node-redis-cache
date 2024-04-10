@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const validator = require('validator')
 
 const User = require('../models/User')
-const key = require('../configs/dbSecretKeys')
+const key = process.env.SECRET_OR_KEY
 
 // REGISTER
 const register = async (req, res) => {

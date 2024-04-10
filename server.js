@@ -1,13 +1,12 @@
-// INITIALIZATION
+require('dotenv').config()
 const express = require('express');
 const app = express();
 
 // DB CONNECT
 const mongoose = require("mongoose");
-const { mongoURI } = require("./configs/dbSecretKeys");
 const connectToDatabase = () => {
     try {
-        mongoose.connect(mongoURI, {
+        mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
@@ -32,10 +31,9 @@ app.use('/api/users', users);
 
 // SESSION
 const session = require('express-session');
-const sk = require('./configs/dbSecretKeys').secretOrKey;
 app.use(
     session({
-        secret: sk,
+        secret: process.env.SECRET_OR_KEY,
         resave: true,
         saveUninitialized: true,
     })
