@@ -27,7 +27,7 @@ app.use(express.json());
 const auth = require('./routes/api/auth');
 const users = require('./routes/api/users');
 const posts = require('./routes/api/posts');
-app.use('/api/auth', auth);
+app.use('/api/auths', auth);
 app.use('/api/users', users);
 app.use('/api/posts', posts);
 

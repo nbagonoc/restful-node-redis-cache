@@ -16,7 +16,7 @@ const getPosts = async (req, res) => {
 
 const getPostsByUser = async (req, res) => {
     try {
-        const posts = await Post.find({ user: req.params._id })
+        const posts = await Post.find({ user: req.params.id })
             .sort({ createdAt: -1 })
             .select('-__v')
         if (!posts) {
@@ -49,7 +49,7 @@ const createPost = async (req, res) => {
         const { title, content } = req.body
         const newPost = new Post({ title, content, user: req.user._id})
         await newPost.save()
-        return res.status(201).json({ message: 'Post created!' })
+        return res.status(200).json(newPost)
     } catch (error) {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
@@ -71,7 +71,7 @@ const updatePost = async (req, res) => {
         const { title, content } = req.body
         post.set({ title, content })
         await post.save()
-        return res.status(200).json({ message: 'Post updated!' })
+        return res.status(200).json(post)
     } catch (error) {
         return res.status(500).json({ message: 'Internal Server Error' });
     }

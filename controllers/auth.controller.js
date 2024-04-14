@@ -78,22 +78,23 @@ const validateLogin = (data) => {
 
 // VALIDATE REGISTER
 const validateRegister = (data) => {
+    const { firstName, lastName, email, password, password2 } = data
     let errors = {}
 
-    if (validator.isEmpty(data.firstName, { ignore_whitespace: true }))
+    if (validator.isEmpty(firstName, { ignore_whitespace: true }))
         errors.firstName = 'First name is required'
-    if (validator.isEmpty(data.lastName, { ignore_whitespace: true }))
+    if (validator.isEmpty(lastName, { ignore_whitespace: true }))
         errors.lastName = 'Last name is required'
-    if (!validator.isEmail(data.email)) errors.email = 'Email is invalid'
-    if (validator.isEmpty(data.email, { ignore_whitespace: true }))
+    if (!validator.isEmail(email)) errors.email = 'Email is invalid'
+    if (validator.isEmpty(email, { ignore_whitespace: true }))
         errors.email = 'Email is required'
-    if (!validator.isStrongPassword(data.password))
-        errors.password = 'Password not strong enough'
-    if (validator.isEmpty(data.password, { ignore_whitespace: true }))
+    // if (!validator.isStrongPassword(password))
+    //     errors.password = 'Password not strong enough'
+    if (validator.isEmpty(password, { ignore_whitespace: true }))
         errors.password = 'Password is required'
-    if (!validator.equals(data.password, data.password2))
+    if (!validator.equals(password, password2))
         errors.password2 = 'Passwords must match'
-    if (validator.isEmpty(data.password2, { ignore_whitespace: true }))
+    if (validator.isEmpty(password2, { ignore_whitespace: true }))
         errors.password2 = 'Confirm password is required'
     return {
         errors,
