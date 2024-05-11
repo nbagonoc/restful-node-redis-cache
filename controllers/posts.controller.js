@@ -4,7 +4,13 @@ const Post = require('../models/Post')
 
 const getPosts = async (req, res) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 }).select('-__v')
+        const posts = await Post.find()
+                                .populate({
+                                    path: 'user',
+                                    select: 'firstName lastName'
+                                })
+                                .sort({ created: -1 })
+                                .select('-__v')
         if (!posts) {
             return res.status(404).json({ message: 'Posts not found.' })
         }
@@ -17,7 +23,7 @@ const getPosts = async (req, res) => {
 const getPostsByUser = async (req, res) => {
     try {
         const posts = await Post.find({ user: req.params.id })
-            .sort({ createdAt: -1 })
+            .sort({ created: -1 })
             .select('-__v')
         if (!posts) {
             return res.status(404).json({ message: 'Posts not found.' })
@@ -30,7 +36,12 @@ const getPostsByUser = async (req, res) => {
 
 const getPost = async (req, res) => {
     try {
-        const post = await Post.findById(req.params.id).select('-__v')
+        const post = await Post.findById(req.params.id)
+                                .populate({
+                                    path: 'user',
+                                    select: 'firstName lastName'
+                                })
+                                .select('-__v')
         if (!post) {
             return res.status(404).json({ message: 'Post not found.' })
         }
@@ -101,7 +112,7 @@ const validatePost = (data) => {
     if (!validator.isLength(title, { min: 5, max: 100 })) {
         errors.title = 'Title must be between 5 and 100 characters.'
     }
-    if (!validator.isLength(content, { min: 10, max: 1000 })) {
+    if (!validator.isLength(content, { min: 10, max: 10000 })) {
         errors.content = 'Content must be between 10 and 1000 characters.'
     }
     return {
