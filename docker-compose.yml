@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  mongo_db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  nodeapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5100:5100"
+    environment:
+      MONGO_URI: mongodb://mongo_db:27017/restful-node-multi-user
+      SECRET_OR_KEY: l0c@ls3cr3t
+      PORT: 5100
+    depends_on:
+      - mongo_db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
