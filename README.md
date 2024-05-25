@@ -1,4 +1,4 @@
-## React Blog
+## Node Blog
 
 A simple Blog site powerd by node, express and mongoDB. This is the backend, while the frontend is: react-blog(https://github.com/nbagonoc/react-blog)
 
