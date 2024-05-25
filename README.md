@@ -4,7 +4,7 @@ A simple Blog site powerd by node, express and mongoDB. This is the backend, whi
 
 ## Features:
 - Registration
-- Login
+- Login(JWT)
 - Create blog post
 - View yours, and others blog post
 - Update your blog post
