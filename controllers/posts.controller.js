@@ -70,7 +70,6 @@ const searchPosts = async (req, res) => {
             .where('title')
             .regex(new RegExp(title, 'i'))
             .select('-__v')
-            console.log(posts);
         if (!posts) {
             return res.status(404).json({ message: 'Post not found!' })
         }
