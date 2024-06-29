@@ -3,20 +3,26 @@ const validator = require('validator')
 const Post = require('../models/Post')
 
 const getPosts = async (req, res) => {
+    const page = req.query.page || 0
+    const limit = req.query.limit || 5
+    const skip = page * limit
+
     try {
         const posts = await Post.find()
-                                .populate({
-                                    path: 'user',
-                                    select: 'firstName lastName'
-                                })
-                                .sort({ created: -1 })
-                                .select('-__v')
+            .populate({
+                path: 'user',
+                select: 'firstName lastName',
+            })
+            .sort({ created: -1 })
+            .skip(skip)
+            .limit(limit)
+            .select('-__v')
         if (!posts) {
             return res.status(404).json({ message: 'Posts not found.' })
         }
         return res.status(200).json(posts)
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
@@ -30,24 +36,24 @@ const getPostsByUser = async (req, res) => {
         }
         return res.status(200).json(posts)
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
 const getPost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.id)
-                                .populate({
-                                    path: 'user',
-                                    select: 'firstName lastName'
-                                })
-                                .select('-__v')
+            .populate({
+                path: 'user',
+                select: 'firstName lastName',
+            })
+            .select('-__v')
         if (!post) {
             return res.status(404).json({ message: 'Post not found.' })
         }
         return res.status(200).json(post)
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
@@ -58,11 +64,11 @@ const createPost = async (req, res) => {
     }
     try {
         const { title, content } = req.body
-        const newPost = new Post({ title, content, user: req.user._id})
+        const newPost = new Post({ title, content, user: req.user._id })
         await newPost.save()
         return res.status(200).json(newPost)
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
@@ -77,14 +83,18 @@ const updatePost = async (req, res) => {
             return res.status(404).json({ message: 'Post not found.' })
         }
         if (post.user.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: 'You are not authorized to update this post.' })
+            return res
+                .status(403)
+                .json({
+                    message: 'You are not authorized to update this post.',
+                })
         }
         const { title, content } = req.body
         post.set({ title, content })
         await post.save()
         return res.status(200).json(post)
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
@@ -102,7 +112,7 @@ const deletePost = async (req, res) => {
         await post.remove()
         return res.status(200).json({ message: 'Post deleted!' })
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
