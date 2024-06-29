@@ -57,6 +57,29 @@ const getPost = async (req, res) => {
     }
 }
 
+const searchPosts = async (req, res) => {
+    title = req.query.title
+
+    try {
+        const posts = await Post.find()
+            .populate({
+                path: 'user',
+                select: 'firstName lastName',
+            })
+            .sort({ created: -1 })
+            .where('title')
+            .regex(new RegExp(title, 'i'))
+            .select('-__v')
+            console.log(posts);
+        if (!posts) {
+            return res.status(404).json({ message: 'Post not found!' })
+        }
+        return res.status(200).json(posts)
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error!!' })
+    }
+}
+
 const createPost = async (req, res) => {
     const validation = validatePost(req.body)
     if (!validation.isValid) {
@@ -135,6 +158,7 @@ module.exports = {
     getPosts,
     getPostsByUser,
     getPost,
+    searchPosts,
     createPost,
     updatePost,
     deletePost,

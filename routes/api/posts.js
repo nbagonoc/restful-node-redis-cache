@@ -22,6 +22,11 @@ router.get(
 )
 
 router.get(
+    '/search',
+    postsController.searchPosts
+)
+
+router.get(
     '/:id',
     postsController.getPost
 )
