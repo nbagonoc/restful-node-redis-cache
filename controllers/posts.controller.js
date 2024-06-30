@@ -58,24 +58,35 @@ const getPost = async (req, res) => {
 }
 
 const searchPosts = async (req, res) => {
-    title = req.query.title
+    const page = parseInt(req.query.page) || 0
+    const limit = parseInt(req.query.limit) || 5
+    const skip = (page - 1) * limit
+    const search = req.query.search || ''
 
     try {
-        const posts = await Post.find()
+         //search only by title
+        // const posts = await Post.find({ title: new RegExp(search, 'i') })
+        // search by title and content
+        const posts = await Post.find({
+            $or: [
+                { title: new RegExp(search, 'i') },
+                { content: new RegExp(search, 'i') },
+            ],
+        })
             .populate({
                 path: 'user',
                 select: 'firstName lastName',
             })
             .sort({ created: -1 })
-            .where('title')
-            .regex(new RegExp(title, 'i'))
+            .skip(skip)
+            .limit(limit)
             .select('-__v')
         if (!posts) {
-            return res.status(404).json({ message: 'Post not found!' })
+            return res.status(404).json({ message: 'Posts not found.' })
         }
         return res.status(200).json(posts)
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error!!' })
+        return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
 
@@ -105,11 +116,9 @@ const updatePost = async (req, res) => {
             return res.status(404).json({ message: 'Post not found.' })
         }
         if (post.user.toString() !== req.user._id.toString()) {
-            return res
-                .status(403)
-                .json({
-                    message: 'You are not authorized to update this post.',
-                })
+            return res.status(403).json({
+                message: 'You are not authorized to update this post.',
+            })
         }
         const { title, content } = req.body
         post.set({ title, content })
