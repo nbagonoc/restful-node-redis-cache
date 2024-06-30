@@ -61,16 +61,16 @@ const searchPosts = async (req, res) => {
     const page = parseInt(req.query.page) || 0
     const limit = parseInt(req.query.limit) || 5
     const skip = (page - 1) * limit
-    const search = req.query.search || ''
+    const query = req.query.query || ''
 
     try {
-         //search only by title
-        // const posts = await Post.find({ title: new RegExp(search, 'i') })
-        // search by title and content
+         //query only by title
+        // const posts = await Post.find({ title: new RegExp(query, 'i') })
+        // query by title and content
         const posts = await Post.find({
             $or: [
-                { title: new RegExp(search, 'i') },
-                { content: new RegExp(search, 'i') },
+                { title: new RegExp(query, 'i') },
+                { content: new RegExp(query, 'i') },
             ],
         })
             .populate({
