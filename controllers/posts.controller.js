@@ -7,14 +7,21 @@ const Redis = require('redis')
 const redisClient = Redis.createClient()
 redisClient.on('error', (err) => console.log('Redis Client Error', err))
 redisClient.connect()
-const DEFAULT_EXPIRATION = 3600
+const DEFAULT_EXPIRATION = 300 // 5 minutes
+
 
 const getPosts = async (req, res) => {
     const page = req.query.page || 0
     const limit = req.query.limit || 5
     const skip = page * limit
+    const cacheKey = `posts:${page}:${limit}`
 
     try {
+        const cachedPosts = await redisClient.get(cacheKey);
+        if (cachedPosts) {
+            return res.status(200).json(JSON.parse(cachedPosts));
+        }
+
         const posts = await Post.find()
             .populate({
                 path: 'user',
@@ -27,8 +34,11 @@ const getPosts = async (req, res) => {
         if (!posts) {
             return res.status(404).json({ message: 'Posts not found.' })
         }
+
+        await redisClient.setEx(cacheKey, DEFAULT_EXPIRATION, JSON.stringify(posts))
         return res.status(200).json(posts)
     } catch (error) {
+        console.error(`Error fetching posts: ${error}`);
         return res.status(500).json({ message: 'Internal Server Error' })
     }
 }
