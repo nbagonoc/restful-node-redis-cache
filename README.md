@@ -7,6 +7,9 @@ A simple Blog site powerd by node, express and mongoDB and Redis. This is the ba
 - Login(JWT)
 - Create blog post
 - View yours, and others blog post
+    - pagination
+    - caching
+    - search by title, content
 - Update your blog post
 - Delete your blog post
 
