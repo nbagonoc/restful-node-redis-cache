@@ -1,6 +1,13 @@
+const Post = require('../models/Post')
+
 const validator = require('validator')
 
-const Post = require('../models/Post')
+// Redis Cache
+const Redis = require('redis')
+const redisClient = Redis.createClient()
+redisClient.on('error', (err) => console.log('Redis Client Error', err))
+redisClient.connect()
+const DEFAULT_EXPIRATION = 3600
 
 const getPosts = async (req, res) => {
     const page = req.query.page || 0
@@ -27,15 +34,25 @@ const getPosts = async (req, res) => {
 }
 
 const getPostsByUser = async (req, res) => {
+    const userId = req.params.id
+    const cacheKey = `postsByUser:${userId}`
+
     try {
-        const posts = await Post.find({ user: req.params.id })
-            .sort({ created: -1 })
-            .select('-__v')
-        if (!posts) {
+        const cachedPosts = await redisClient.get(cacheKey);
+        if (cachedPosts) {
+            return res.status(200).json(JSON.parse(cachedPosts));
+        }
+
+        const posts = await Post.find({ user: userId }).sort({ created: -1 })
+
+        if (!posts.length) {
             return res.status(404).json({ message: 'Posts not found.' })
         }
+
+        await redisClient.setEx(cacheKey, DEFAULT_EXPIRATION, JSON.stringify(posts))
         return res.status(200).json(posts)
     } catch (error) {
+        console.error(`Error fetching posts by user: ${error}`);
         return res.status(500).json({ message: 'Internal Server Error' })
     }
 }

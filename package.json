@@ -30,6 +30,7 @@
     "mongoose": "^6.3.0",
     "passport": "^0.5.2",
     "passport-jwt": "^4.0.0",
+    "redis": "^4.6.15",
     "validator": "^13.11.0"
   }
 }
